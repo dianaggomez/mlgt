@@ -113,9 +113,16 @@ class OneShotEnv(Environment):
         self._seed = seed
         # max:action 48 obs=1380 min:action=20 obs=783 score=25
 
-        if args.oneshot_name == "One-Shot-Small":  # max:action=28 obs=215 min:action=10 obs=116 score=5
+        if args.oneshot_name == "One-Shot-SimpleCase":  # max:action=28 obs=215 min:action=10 obs=116 score=5
             config = {
                 "players": args.num_agents,
+                "vehicles": 1,
+                # "observation_type": pyhanabi.AgentObservationType.CARD_KNOWLEDGE.value,
+                "seed": self._seed
+            }
+        elif args.oneshot_name == "One-Shot-3Firms":
+            config = {
+                "players": 3,
                 "vehicles": 1,
                 # "observation_type": pyhanabi.AgentObservationType.CARD_KNOWLEDGE.value,
                 "seed": self._seed
@@ -136,12 +143,13 @@ class OneShotEnv(Environment):
             self.action_space.append(Box(np.array([0, 0]), np.array([0.50, 0.75]))) #  price (p), efficiency reduction(x)), # Bounds: p_j = [0, 50],  x_j = [0, 0.75] 
             self.observation_space.append([0])
             self.share_observation_space.append([0])
-        
+            
         # turn them in to array
         self.observation_space = np.array(self.observation_space)
         self.share_observation_space  = np.array(self.share_observation_space)
-        self.previous_action = np.zeros((len(np.array(self.action_space).shape), 2)) # can adjust the 2 for the more options on vehicles
-        
+        # self.previous_action = np.zeros((len(np.array(self.action_space).shape), 2)) # can adjust the 2 for the more options on vehicles
+        self.previous_action = np.zeros((len(self.action_space), 2))
+
         # I believe we dont even need to create an observation space
 
     def seed(self, seed=None):
@@ -169,7 +177,7 @@ class OneShotEnv(Environment):
 
         # available_actions = np.ones((2,))
 
-        self.previous_action = np.zeros((len(np.array(self.action_space).shape), 2)) # can adjust the 2 for the more options on vehicles
+        self.previous_action = np.zeros((len(self.action_space), 2)) # can adjust the 2 for the more options on vehicles
         
         return obs, share_obs #, available_actions
 
@@ -194,7 +202,8 @@ class OneShotEnv(Environment):
         Raises:
           AssertionError: When an illegal action is provided.
         """
-
+        #### print actions that are intialy being sent through
+        # print("actions sent through: ", action)
         # Calculate each firms reward given the action
         # processed_action = []
         # for a in action:
@@ -226,6 +235,8 @@ class OneShotEnv(Environment):
         # Reward function which is profit
         rewards = (p - manufacturing_cost) * demand_volume
       
+        # print("Shape of Previous action: ", np.array(self.previous_action).shape)
+        # print("Shape of current action: ", np.array(action).shape)
         difference_in_actions = np.linalg.norm(np.array(self.previous_action) - np.array(action), axis =1)
         # print(difference_in_actions)
         # if (difference_in_actions < self.epslion).any():
@@ -234,6 +245,7 @@ class OneShotEnv(Environment):
         #   done = False
 
         done = difference_in_actions < self.epslion
+        # done = True
         # dprint("done: ", done)
 
         # Reward is score differential. May be large and negative at game end.
@@ -241,7 +253,10 @@ class OneShotEnv(Environment):
 
         obs = np.array([0])
 
-        share_obs = np.array([[0],[0]])
+        share_obs = []
+        for i in range(self.players):
+            share_obs.append([0])
+        share_obs = np.array(share_obs)
 
         # available_actions = np.ones((2,))
       

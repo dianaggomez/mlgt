@@ -232,58 +232,85 @@ if __name__ == '__main__':
     # Initialize agents for training.
     agents = [create_agent(state_size, action_size) for _ in range(num_agents)]
 
-    # # Give agent 1 the policy learned
+    # ================ Assign the Learned Policy to each Agent ==================
+    # # Give agent 0 the policy learned
     # for i in range(2):
-    #     agents[i].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/agent_{num}_episode_10000.pth".format(num = i)))
+    #     agents[i].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/SimpleCase/agent_{num}_episode_10000_test.pth".format(num = i)))
     #     agents[i].actor_critic.eval()
-    # # agents[1].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/agent_1_episode_10000.pth"))
-    # # agents[1].actor_critic.eval()
-    # # Create MAPPOTrainer object to train agents.
-    # save_dir = os.path.join(os.getcwd(), r'project_training_files')
-    # trainer = create_trainer(env, agents, save_dir)
+    
+    # load the train file per agent:
+    # agents[0].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/agent_0_episode_10000_1_constant.pth"))
+    # agents[0].actor_critic.eval()
+    # agents[1].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/agent_1_episode_10000_run_1.pth"))
+    # agents[1].actor_critic.eval()
+    # ===========================================================================
 
-    # # Train agent in specified environment.
-    # train_agents(env, trainer)
+    # ================ Training each Agent ==================
+    # Create MAPPOTrainer object to train agents.
+    save_dir = os.path.join(os.getcwd(), r'project_training_files/SimpleCase')
+    trainer = create_trainer(env, agents, save_dir)
 
-    for i in range(2):
-        agents[i].actor_critic.load_state_dict(torch.load("/Users/diana/Desktop/mappo-competitive-reinforcement-main/project_training_files/agent_{num}_episode_10000_1_constant.pth".format(num = i)))
-        agents[i].actor_critic.eval()
+    # Train agent in specified environment.
+    train_agents(env, trainer)
 
-    #     # Print model's state_dict
-    #     print("Model's state_dict:")
-    #     for param_tensor in agents[i].actor_critic.state_dict():
-    #         print(param_tensor, "\t", agents[i].actor_critic.state_dict()[param_tensor].size())
+    # ================ Printing Models Paramters ==================
+    # #     # Print model's state_dict
+    # #     print("Model's state_dict:")
+    # #     for param_tensor in agents[i].actor_critic.state_dict():
+    # #         print(param_tensor, "\t", agents[i].actor_critic.state_dict()[param_tensor].size())
 
-    # # Print optimizer's state_dict
-    # print("Optimizer's state_dict:")
-    # for var_name in optimizer.state_dict():
-    #     print(var_name, "\t", optimizer.state_dict()[var_name])
+    # # # Print optimizer's state_dict
+    # # print("Optimizer's state_dict:")
+    # # for var_name in optimizer.state_dict():
+    # #     print(var_name, "\t", optimizer.state_dict()[var_name])
+    
+    # =================================================================
 
+
+    # ================ Run: Sample Actions ==================
     # Given a state (the dummy state) gather the action for each agent
-
-    obs, share_obs = env.reset()
-    processed_state = torch.from_numpy(obs).float()
+    # obs, share_obs = env.reset()
+    # processed_state = torch.from_numpy(obs).float()
 
     # print(env.action_space[0].high)
     # print(env.action_space[0].low)
-    for j in range(2):
-        print(j)
-        actions = []
-        # print("Normal distribution : ", agents[i].actor_critic.actor(processed_state))
-        for i in range(2):
-            actions.append(agents[i].get_actions(processed_state)[0])
 
-        raw_actions = np.array(
-            [torch.clamp(a, -1, 1).numpy()  for a in actions]
-        )
-        # gather high and low for each
-        low = env.action_space[0].low
-        high = env.action_space[0].high
-        raw_actions = np.array(
-            [(a/2 + 0.5)*(high - low) + low for a in raw_actions])
-        # print(np.clip(actions[0], env.action_space[0].low, env.action_space[0].high))
-        print("Raw Actions: ", raw_actions)
-            # print("Action of Agent {num}: ".format(num = i), agents[i].get_actions(processed_state)[0])
-            # print("Log Prob of Action for Agent {num}: ".format(num = i), agents[i].get_actions(processed_state)[1])
-            
+    # all_actions = []
+    # transformed_actions_agent1 = []
+    # transformed_actions_agent2 = []
+    # reward = []
+
+    # for j in range(100):
+    #     print(j)
+    #     actions = []
+    #     obs, share_obs = env.reset()
+    #     processed_state = torch.from_numpy(obs).float()
+    #     # print("Normal distribution : ", agents[i].actor_critic.actor(processed_state))
+    #     for i in range(2):
+    #         actions.append(agents[i].get_actions(processed_state)[0])
+
+    #     raw_actions = np.array(
+    #         [torch.clamp(a, -1, 1).numpy()  for a in actions]
+    #     )
+    #     # gather high and low for each
+    #     low = env.action_space[0].low
+    #     high = env.action_space[0].high
+    #     raw_actions = np.array(
+    #         [(a/2 + 0.5)*(high - low) + low for a in raw_actions])
+    #     # print(np.clip(actions[0], env.action_space[0].low, env.action_space[0].high))
+    #     # print("Raw Actions: ", raw_actions)
+    #         # print("Action of Agent {num}: ".format(num = i), agents[i].get_actions(processed_state)[0])
+    #         # print("Log Prob of Action for Agent {num}: ".format(num = i), agents[i].get_actions(processed_state)[1])
+        
+    #     transformed_actions_agent1.append(raw_actions[0,:])
+    #     transformed_actions_agent2.append(raw_actions[1,:])
+    #     all_actions.append(actions)
+        
+    #     obs, share_obs, rewards, done, infos = env.step(raw_actions)
+    #     reward.append(rewards)
+    
+    # np.save("rewards_test.npy", np.array(reward))
+    # # np.save("actions.npy", np.array(all_actions))
+    # np.save("transformed_actions_agent_1_test.npy", np.array(transformed_actions_agent1))
+    # np.save("transformed_actions_agent_2_test.npy", np.array(transformed_actions_agent2))
 

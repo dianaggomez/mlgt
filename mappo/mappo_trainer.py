@@ -34,7 +34,7 @@ class MAPPOTrainer:
         # self.brain_name = env.brain_names[0]
         self.agents = agents
         self.score_window_size = score_window_size
-        self.max_episode_length = 60 #max_episode_length, stop after 60 iterations
+        self.max_episode_length = 1 #max_episode_length, stop after 60 iterations
         self.update_frequency = update_frequency
         self.save_dir = save_dir
         self.score_history = []
@@ -136,13 +136,15 @@ class MAPPOTrainer:
                 agent.add_memory(state, action, log_prob, reward, done)
 
             # Initiate learning for agent if update frequency is observed.
-            if self.timestep % self.update_frequency == 0:
-
+            if True:
+            # if self.timestep % self.update_frequency == 0:
+                # pass if we are evaluating the agents' learned policy
+                # pass
             # TODO: Only update the agent that we are training
-                # for agent in self.agents:
-                #     agent.update()
+                for agent in self.agents:
+                    agent.update()
 
-                self.agents[0].update()
+                # self.agents[1].update()
 
             # Append reward gained for each new action.
             scores.append(rewards)
@@ -187,7 +189,7 @@ class MAPPOTrainer:
         # Save actor_critic for each agent in specified save location.
         for agent_ix in range(len(self.agents)):
             agent = self.agents[agent_ix]
-            filename = f'agent_{agent_ix}_episode_{self.i_episode}_1_constant.pth'
+            filename = f'agent_{agent_ix}_episode_{self.i_episode}_test.pth'
             state_dict = agent.actor_critic.state_dict()
             torch.save(state_dict, os.path.join(self.save_dir, filename))
 
@@ -231,7 +233,7 @@ class MAPPOTrainer:
         # Plot rewards per agent and cumulative moving averages.
         fig, ax = plt.subplots(figsize=(12, 9))
         ax.set_title(
-            f'Learning Curve: Multi-Agent PPO',
+            f'Learning Curve: Multi-Agent PPO w/ SimpleCase',
             fontsize=28
         )
         ax.set_xlabel('Episode', fontsize=21)
@@ -245,6 +247,6 @@ class MAPPOTrainer:
         plt.tight_layout()
 
         # Save resulting plot.
-        filename = f'reward_{self.i_episode}'
+        filename = f'reward_{self.i_episode}_SimpleCase'
         fig.savefig(os.path.join(self.save_dir, filename))
         plt.show()

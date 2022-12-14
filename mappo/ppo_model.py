@@ -180,8 +180,8 @@ class PolicyNormal(nn.Module):
         action_mu, action_sigma = self.actor(state)
         dist = self.get_dist(action_mu, action_sigma)
 
-        print("action_mu: ", action_mu)
-        print("action_sigma: ", action_sigma)
+        # print("Normal Distribution: mean ", action_mu," sigma ", action_sigma)
+      
         # Sample action value from generated distribution.
         action = dist.sample()
 
